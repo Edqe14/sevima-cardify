@@ -61,7 +61,6 @@ model VerificationToken {
 model Collection {
   id        String   @id @default(cuid())
   name      String
-  slug      String   @unique
   public    Boolean  @default(false)
   userId    String
   createdAt DateTime @default(now())

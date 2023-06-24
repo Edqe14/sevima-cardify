@@ -1,4 +1,5 @@
 import './src/lib/env.mjs';
+import { withSuperjson } from 'next-superjson';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -12,4 +13,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSuperjson()(nextConfig);

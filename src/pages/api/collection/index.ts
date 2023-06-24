@@ -1,5 +1,4 @@
 import { type DefaultResponse, createApiRouter } from '@/lib/api';
-import { slugify } from '@/lib/helpers/slugify';
 import { authenticated } from '@/lib/middlewares/authenticated';
 import { prisma } from '@/lib/prisma';
 import type { Collection } from '@prisma/client';
@@ -39,7 +38,6 @@ router
     const collection = await prisma.collection.create({
       data: {
         name: parsed.data.name,
-        slug: slugify(parsed.data.name),
         userId: req.session.user.id,
       },
     });

@@ -3,9 +3,14 @@ import { useForm } from '@mantine/form';
 import { openModal } from '@mantine/modals';
 import { generate } from 'random-words';
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
+import type { Collection } from '@prisma/client';
+import { showNotification } from '@mantine/notifications';
+import { DefaultResponse, fetcher } from '../api';
 
 const ModalContent = () => {
-  const generatedName = useMemo(() => generate(3).join('-'), []);
+  const router = useRouter();
+  const generatedName = useMemo(() => generate(3).join(' '), []);
   const [loading, setLoading] = useState(false);
   const form = useForm({
     initialValues: {
@@ -19,16 +24,42 @@ const ModalContent = () => {
     },
   });
 
-  const onSubmit = form.onSubmit((values) => {
-    console.log(values);
+  const onSubmit = form.onSubmit(async (values) => {
     setLoading(true);
+
+    try {
+      const res = await fetcher<DefaultResponse<Collection>>(
+        '/api/collection',
+        {
+          method: 'POST',
+          body: JSON.stringify(values),
+        },
+      );
+
+      setLoading(false);
+
+      if (res.error || !res.data) {
+        form.setFieldError('name', 'Invalid name');
+        return;
+      }
+
+      router.push(`/editor/${res.data.id}`);
+    } catch {
+      setLoading(false);
+
+      showNotification({
+        color: 'red',
+        title: 'Error',
+        message: 'Something went wrong',
+      });
+    }
   });
 
   return (
     <section>
       <form onSubmit={onSubmit}>
         <TextInput
-          className="mb-4"
+          className="mb-2"
           label="Name"
           placeholder={generatedName}
           disabled={loading}

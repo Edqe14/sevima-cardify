@@ -12,6 +12,8 @@ import { mantineCache, theme } from '@/lib/mantine';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import { IconContext } from '@phosphor-icons/react';
+import { SWRConfig } from 'swr';
+import { fetcher } from '@/lib/api';
 
 export default function App({
   Component,
@@ -25,21 +27,27 @@ export default function App({
           weight: 'bold',
         }}
       >
-        <MantineProvider
-          withCSSVariables
-          withGlobalStyles
-          emotionCache={mantineCache}
-          theme={theme}
+        <SWRConfig
+          value={{
+            fetcher,
+          }}
         >
-          <ModalsProvider
-            modalProps={{
-              centered: true,
-            }}
+          <MantineProvider
+            withCSSVariables
+            withGlobalStyles
+            emotionCache={mantineCache}
+            theme={theme}
           >
-            <Notifications />
-            <Component {...pageProps} />
-          </ModalsProvider>
-        </MantineProvider>
+            <ModalsProvider
+              modalProps={{
+                centered: true,
+              }}
+            >
+              <Notifications />
+              <Component {...pageProps} />
+            </ModalsProvider>
+          </MantineProvider>
+        </SWRConfig>
       </IconContext.Provider>
     </SessionProvider>
   );

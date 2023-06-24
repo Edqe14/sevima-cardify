@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
+import SuperJSON from 'superjson';
+import { patchSuperJSON } from './helpers/patchSuperJSON';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface DefaultResponse<T = any> {
@@ -10,6 +12,12 @@ export interface DefaultResponse<T = any> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createApiRouter = <Data extends DefaultResponse>() => {
   const router = createRouter<NextApiRequest, NextApiResponse<Data>>();
+
+  // Patch SuperJSON to support Next.js API routes
+  router.use((_, res, next) => {
+    patchSuperJSON(res);
+    next();
+  });
 
   const handle = () =>
     router.handler({
@@ -22,3 +30,17 @@ export const createApiRouter = <Data extends DefaultResponse>() => {
 
   return { router, handle };
 };
+
+export const fetcher = async <T = unknown>(
+  key: RequestInfo | URL,
+  init?: RequestInit,
+): Promise<T> =>
+  fetch(key, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...init?.headers,
+    },
+  })
+    .then((res) => res.text())
+    .then((value) => SuperJSON.parse(value));
