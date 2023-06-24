@@ -48,6 +48,7 @@
     "random-words": "^2.0.0",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
+    "react-card-flip": "^1.2.0",
     "react-dom": "^18.2.0",
     "salutejs": "^0.0.9",
     "superjson": "^1.12.3",

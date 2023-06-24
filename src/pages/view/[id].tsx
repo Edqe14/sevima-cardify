@@ -4,11 +4,12 @@ import { getServerSession } from 'next-auth';
 import type { Collection, Item } from '@prisma/client';
 import Head from '@/components/Head';
 import { Navbar } from '@/components/Navbar';
-import useSWR, { SWRConfig } from 'swr';
+import { SWRConfig } from 'swr';
+import useSWRImmutable from 'swr/immutable';
 import { fetcher, type DefaultResponse } from '@/lib/api';
 import { Button, LoadingOverlay } from '@mantine/core';
 import { TextEditor } from '@/components/TextEditor';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import type { Editor as EditorType } from '@tiptap/react';
 import { sleep } from '@/lib/helpers/sleep';
@@ -24,6 +25,11 @@ import { Pencil, Share, X, XCircle } from '@phosphor-icons/react';
 import { openSharingModal } from '@/lib/helpers/openSharingModal';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { FlipCard } from '@/components/FlipCard';
+import {
+  pickFlashcardByWrongPicks,
+  type WrongList,
+} from '@/lib/helpers/pickFlashCard';
 import { authOptions } from '../api/auth/[...nextauth]';
 
 interface Data {
@@ -35,15 +41,29 @@ interface Data {
 }
 
 const FlashCard = ({ collectionId }: { collectionId: string }) => {
-  const { data, isLoading } = useSWR<DefaultResponse<Data['collection']>>(
-    `/api/collection/${collectionId}`,
-  );
+  const [pickedItem, setPickedItem] = useState<Item | null>(null);
+  const { data, isLoading } = useSWRImmutable<
+    DefaultResponse<Data['collection']>
+  >(`/api/collection/${collectionId}`);
 
-  console.log(data);
+  const items = data?.data?.items;
+  const picks = useRef<WrongList>([]);
+
+  useEffect(() => {
+    if (items) {
+      const random = pickFlashcardByWrongPicks(items, picks.current);
+
+      setPickedItem(random);
+    }
+  }, [items]);
 
   return (
-    <section>
+    <section className="flex-grow flex items-center justify-center">
       <LoadingOverlay visible={isLoading} />
+
+      {pickedItem && (
+        <FlipCard question={pickedItem.question} answer={pickedItem.answer} />
+      )}
     </section>
   );
 };
@@ -64,7 +84,7 @@ const NavbarRight = ({ collection }: { collection?: Collection }) => {
   );
 };
 
-export default function Editor({ id, collection, forbidden }: Data) {
+export default function Viewer({ id, collection, forbidden }: Data) {
   return (
     <SWRConfig
       value={{
