@@ -51,7 +51,7 @@ export const FlipCard = ({
 
         {question}
 
-        <Button className="absolute -bottom-64">Flip</Button>
+        <Button className="absolute -bottom-64 block md:hidden">Flip</Button>
       </Card>
 
       <Card

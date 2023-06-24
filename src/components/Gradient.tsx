@@ -10,7 +10,7 @@ export const Gradient = ({ className }: { className?: string }) => {
     >
       <mask
         id="mask0_30_7236"
-        style={{maskType: 'alpha'}}
+        style={{ maskType: 'alpha' }}
         maskUnits="userSpaceOnUse"
         x="0"
         y="0"
