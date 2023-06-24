@@ -11,6 +11,7 @@ import { MantineProvider } from '@mantine/core';
 import { mantineCache, theme } from '@/lib/mantine';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
+import { IconContext } from '@phosphor-icons/react';
 
 export default function App({
   Component,
@@ -18,17 +19,24 @@ export default function App({
 }: AppProps) {
   return (
     <SessionProvider session={session}>
-      <MantineProvider
-        withCSSVariables
-        withGlobalStyles
-        emotionCache={mantineCache}
-        theme={theme}
+      <IconContext.Provider
+        value={{
+          size: 16,
+          weight: 'bold',
+        }}
       >
-        <ModalsProvider>
-          <Notifications />
-          <Component {...pageProps} />
-        </ModalsProvider>
-      </MantineProvider>
+        <MantineProvider
+          withCSSVariables
+          withGlobalStyles
+          emotionCache={mantineCache}
+          theme={theme}
+        >
+          <ModalsProvider>
+            <Notifications />
+            <Component {...pageProps} />
+          </ModalsProvider>
+        </MantineProvider>
+      </IconContext.Provider>
     </SessionProvider>
   );
 }

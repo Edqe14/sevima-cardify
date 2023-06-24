@@ -2,7 +2,10 @@
 import Head from '@/components/Head';
 import { Button } from '@mantine/core';
 import { modals } from '@mantine/modals';
+import type { GetServerSideProps } from 'next';
+import { getServerSession } from 'next-auth';
 import { signIn, signOut, useSession } from 'next-auth/react';
+import { authOptions } from './api/auth/[...nextauth]';
 
 export default function Home() {
   const { data, status } = useSession();
@@ -56,3 +59,20 @@ export default function Home() {
     </main>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions);
+
+  if (session) {
+    return {
+      redirect: {
+        destination: '/dashboard',
+        permanent: true,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
+};
