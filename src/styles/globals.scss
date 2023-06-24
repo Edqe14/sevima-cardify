@@ -9,3 +9,11 @@ body {
 #__next {
   @apply flex flex-col h-screen overflow-hidden;
 }
+
+.mantine-RichTextEditor-content {
+  @apply flex-grow;
+}
+
+.ProseMirror {
+  @apply h-full lg:px-72 2xl:px-80 py-8 #{!important};
+}

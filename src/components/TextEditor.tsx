@@ -151,7 +151,7 @@ export const TextEditor = ({
         </RichTextEditor.ControlsGroup>
       </RichTextEditor.Toolbar>
 
-      <RichTextEditor.Content className="overflow-y-auto" />
+      <RichTextEditor.Content className="overflow-y-auto flex flex-col flex-grow" />
     </RichTextEditor>
   );
 };

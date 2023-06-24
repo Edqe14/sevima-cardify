@@ -127,14 +127,14 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
   };
 
   return (
-    <section className="grid flex-grow grid-cols-5 overflow-hidden">
+    <section className="grid flex-grow grid-cols-6 overflow-hidden">
       {isLoading && <LoadingOverlay visible={isLoading} />}
 
       <section className="col-span-2 overflow-hidden flex flex-col">
         <section
-          className={`flex p-6 ${
+          className={`flex px-6 py-[10px] h-[47px] ${
             items.length === 0 ? 'justify-between' : 'justify-end'
-          } items-center`}
+          } items-center border-b`}
         >
           {items.length === 0 && (
             <p className="text-zinc-500">Your flash cards will show here</p>
@@ -143,7 +143,7 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
           <Button onClick={createEmptyCard}>Create Card</Button>
         </section>
 
-        <section className="overflow-y-auto p-6 pt-0" ref={cardsRef}>
+        <section className="overflow-y-auto p-6" ref={cardsRef}>
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="cards">
               {(provided) => (
@@ -166,7 +166,7 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
         </section>
       </section>
 
-      <section className="border-l col-span-3 flex flex-col overflow-hidden relative">
+      <section className="border-l col-span-4 flex flex-col overflow-hidden relative">
         <LoadingOverlay visible={generating} className="pointer-events-auto" />
 
         <TextEditor
