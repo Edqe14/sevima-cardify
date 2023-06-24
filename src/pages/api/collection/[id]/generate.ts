@@ -6,18 +6,16 @@ import { Node } from '@tiptap/pm/model';
 import { getSchema } from '@tiptap/core';
 import { editorExtensions } from '@/components/TextEditor';
 import { davinci } from 'salutejs';
-// import { Configuration, OpenAIApi } from 'openai';
-// import { env } from '@/lib/env.mjs';
+import { createHash } from 'crypto';
+import { kv } from '@vercel/kv';
 
 const { router, handle } = createApiRouter<DefaultResponse<string>>();
 const schema = getSchema([...editorExtensions]);
-// const openai = new OpenAIApi(
-//   new Configuration({
-//     apiKey: env.OPENAI_KEY,
-//   }),
-// );
 
-const agent = davinci<{ text: string }>(
+const agent = davinci<
+  { text: string },
+  { question: string[]; answer: string[] }
+>(
   ({ params, ai, gen }) => ai`
   The following is a text that needs to be summarized and formatted as question and answer pairs.
 
@@ -25,10 +23,10 @@ const agent = davinci<{ text: string }>(
 
   json
   {
-    "items": [${[0, 0, 0].map(
+    "items": [${new Array(10).fill(0).map(
       () => ai`{
-      "question": ${gen('question', { maxTokens: 120 })},
-      "answer": ${gen('answer', { maxTokens: 200 })}
+      "question": "${gen('question', { maxTokens: 120 })}",
+      "answer": "${gen('answer', { maxTokens: 200 })}"
     },`,
     )}]
   }
@@ -76,15 +74,28 @@ router.use(authenticated).post(async (req, res) => {
   const node = Node.fromJSON(schema, content);
   const text = node.textContent;
 
-  const completion = await agent({
-    text,
-  });
+  const hash = createHash('sha256').update(text).digest('hex');
+  const cached = await kv.get(hash);
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  // const answer = completion.data.choices[0].message!.content!;
-  console.log(completion);
+  console.log(cached);
 
-  res.json({ data: completion });
+  if (!cached) {
+    const completion = await agent({
+      text,
+    });
+
+    const mapped = completion.question.map((question, i) => ({
+      question,
+      answer: completion.answer[i],
+    }));
+
+    await kv.set(hash, mapped);
+    await kv.expire(hash, 5 * 60);
+
+    console.log(mapped);
+  }
+
+  res.json({ message: 'Generated', data: cached });
 });
 
 export default handle();
