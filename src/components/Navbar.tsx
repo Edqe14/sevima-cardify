@@ -1,6 +1,6 @@
-import { Loader, Menu } from '@mantine/core';
+import { Button, Loader, Menu } from '@mantine/core';
 import { SignOut } from '@phosphor-icons/react';
-import { useSession } from 'next-auth/react';
+import { signIn, signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -30,7 +30,7 @@ const AuthenticatedSection = () => {
         </Menu.Target>
 
         <Menu.Dropdown>
-          <Menu.Item color="red" icon={<SignOut />}>
+          <Menu.Item onClick={() => signOut()} color="red" icon={<SignOut />}>
             Log out
           </Menu.Item>
         </Menu.Dropdown>
@@ -50,18 +50,24 @@ export const Navbar = ({ authenticated = true, rightSide }: NavbarProps) => {
         </Link>
 
         <section className="gap-3 text-zinc-600 items-center hidden lg:flex">
-          <Link
-            href="/dashboard"
-            className="transition-colors duration-200 hover:text-zinc-700 "
-          >
-            Dashboard
-          </Link>
+          {authenticated && (
+            <Link
+              href="/dashboard"
+              className="transition-colors duration-200 hover:text-zinc-700 "
+            >
+              Dashboard
+            </Link>
+          )}
         </section>
       </section>
 
       <section className="flex items-center gap-4">
         {rightSide}
+
         {authenticated && <AuthenticatedSection />}
+        {!authenticated && (
+          <Button onClick={() => signIn('google')}>Login</Button>
+        )}
       </section>
     </nav>
   );

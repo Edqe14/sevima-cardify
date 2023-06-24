@@ -5,58 +5,46 @@ import { modals } from '@mantine/modals';
 import type { GetServerSideProps } from 'next';
 import { getServerSession } from 'next-auth';
 import { signIn, signOut, useSession } from 'next-auth/react';
+import { Navbar } from '@/components/Navbar';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { Gradient } from '@/components/Gradient';
 import { authOptions } from './api/auth/[...nextauth]';
 
 export default function Home() {
-  const { data, status } = useSession();
+  const router = useRouter();
+  const { status } = useSession();
 
   return (
-    <main className="p-8">
+    <>
       <Head />
+      <Navbar authenticated={status === 'authenticated'} />
 
-      {status === 'loading' && <p>Loading...</p>}
-      {status === 'authenticated' && (
-        <>
-          <section className="flex items-center gap-4 mb-3">
-            <img
-              src={data?.user?.image as string}
-              alt="pp"
-              className="w-12 rounded-full"
-              referrerPolicy="no-referrer"
-            />
-            <p className="mb-2">
-              Signed in as{' '}
-              <span className="font-medium">{data?.user?.email}</span>
-            </p>
-          </section>
+      <section className="flex flex-col flex-grow items-center pt-36 relative">
+        <h1 className="text-4xl md:text-6xl font-semibold w-80 md:w-[40rem] text-center leading-normal tracking-tight mb-8 text-zinc-800">
+          <span className="bg-yellow-300">AI.</span> Powered{' '}
+          <span className="bg-yellow-300 text-red-500">Flash Card</span>{' '}
+          Generator
+          <span className="text-red-500">.</span>
+        </h1>
 
-          <section className="gap-2 flex">
-            <Button color="red" onClick={() => signOut()}>
-              Sign out
-            </Button>
+        <p className="text-center text-zinc-500 mb-16">
+          Generate flash cards from your content.
+        </p>
 
-            <Button
-              onClick={() =>
-                modals.open({
-                  centered: true,
-                  title: 'Shhh..',
-                  children: <p>This is a secret</p>,
-                })
-              }
-            >
-              Secret Modal
-            </Button>
-          </section>
-        </>
-      )}
+        <Button
+          onClick={() => {
+            if (status === 'authenticated') return router.push('/dashboard');
 
-      {status === 'unauthenticated' && (
-        <>
-          <p className="mb-3">Not signed in.</p>
-          <Button onClick={() => signIn('google')}>Sign in</Button>
-        </>
-      )}
-    </main>
+            return signIn('google');
+          }}
+        >
+          Get Started
+        </Button>
+
+        <Gradient className="absolute bottom-0 z-[-1] h-2/4 opacity-50" />
+      </section>
+    </>
   );
 }
 
