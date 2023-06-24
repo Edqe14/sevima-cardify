@@ -25,7 +25,11 @@ const agent = davinci<{ text: string }, Generated>(
   {
     "items": [${new Array(10).fill(0).map(
       () => ai`{
-      "question": "${gen('question', { maxTokens: 120 })}",
+      "question": "${gen('question', {
+        maxTokens: 80,
+        temperature: 0,
+        topP: 1,
+      })}",
       "answer": "${gen('answer', { maxTokens: 200 })}"
     },`,
     )}]

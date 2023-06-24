@@ -10,6 +10,8 @@ import { openCreateCollectionModal } from '@/lib/helpers/openCreateCollectionMod
 import useSWR, { SWRConfig } from 'swr';
 import { DefaultResponse } from '@/lib/api';
 import Link from 'next/link';
+import { DateTime } from 'luxon';
+import { RandomGradient } from '@/components/RandomGradient';
 import { authOptions } from './api/auth/[...nextauth]';
 
 const Collections = () => {
@@ -17,7 +19,7 @@ const Collections = () => {
     useSWR<DefaultResponse<Collection[]>>('/api/collection');
 
   return (
-    <section className="grid grid-cols-5 gap-3 relative">
+    <section className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 relative">
       {isLoading && <LoadingOverlay visible={isLoading} />}
 
       {data?.data?.length === 0 && (
@@ -26,8 +28,17 @@ const Collections = () => {
 
       {data?.data?.map((collection) => (
         <Link key={collection.id} href={`/editor/${collection.id}`}>
-          <section className="border rounded-md flex items-center justify-center min-h-[4rem] cursor-pointer transition-all duration-200 hover:shadow-md">
-            {collection.name}
+          <section className="border rounded-md min-h-[4rem] h-full overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-md">
+            <RandomGradient className="w-full h-2" />
+            <section className="p-6">
+              <h2 className="text-xl mb-1 font-medium tracking-tight">
+                {collection.name}
+              </h2>
+              <p className="text-sm text-zinc-400">
+                Updated at{' '}
+                {DateTime.fromJSDate(collection.updatedAt).toRelative()}
+              </p>
+            </section>
           </section>
         </Link>
       ))}
