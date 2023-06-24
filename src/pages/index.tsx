@@ -1,12 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 import Head from '@/components/Head';
 import { Button } from '@mantine/core';
-import { modals } from '@mantine/modals';
 import type { GetServerSideProps } from 'next';
 import { getServerSession } from 'next-auth';
-import { signIn, signOut, useSession } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { Navbar } from '@/components/Navbar';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Gradient } from '@/components/Gradient';
 import { authOptions } from './api/auth/[...nextauth]';
