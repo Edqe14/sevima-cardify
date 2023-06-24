@@ -202,8 +202,8 @@ export const getServerSideProps: GetServerSideProps<Data> = async (context) => {
 
   if (
     (!session && !collection.public) ||
-    (session && session.user.id !== collection.userId && !collection.public) ||
     (session &&
+      session.user.id !== collection.userId &&
       !collection.accessLists.find(
         (list) => list.email === session.user.email,
       ) &&
