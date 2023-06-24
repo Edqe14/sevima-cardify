@@ -20,6 +20,8 @@ import {
   OnDragEndResponder,
 } from 'react-beautiful-dnd';
 import { reorder } from '@/lib/helpers/reorder';
+import { Share } from '@phosphor-icons/react';
+import { openSharingModal } from '@/lib/helpers/openSharingModal';
 import { authOptions } from '../api/auth/[...nextauth]';
 
 interface Data {
@@ -32,6 +34,7 @@ interface Data {
 const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [updating, setUpdating] = useState<string | null>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const { data, isLoading, mutate } = useSWR<
     DefaultResponse<Data['collection']>
@@ -111,12 +114,16 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
 
     const changed = newItems.filter((old, i) => items[i].id !== old.id);
 
-    fetcher(`/api/collection/${collectionId}/item/reorder`, {
+    setUpdating(result.draggableId);
+
+    await fetcher(`/api/collection/${collectionId}/item/reorder`, {
       method: 'PUT',
       body: JSON.stringify(changed),
     });
 
     await mutate();
+
+    setUpdating(null);
   };
 
   return (
@@ -147,6 +154,7 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
                       item={item}
                       index={i}
                       collectionId={collectionId}
+                      updating={updating === item.id}
                     />
                   ))}
 
@@ -174,6 +182,21 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
   );
 };
 
+const NavbarRight = ({ collectionId }: { collectionId: string }) => {
+  return (
+    <>
+      <Button
+        color="yellow"
+        variant="outline"
+        onClick={() => openSharingModal(collectionId)}
+        leftIcon={<Share />}
+      >
+        Sharing
+      </Button>
+    </>
+  );
+};
+
 export default function Editor({ id, collection }: Data) {
   return (
     <SWRConfig
@@ -184,7 +207,7 @@ export default function Editor({ id, collection }: Data) {
       }}
     >
       <Head title={`Editing ${collection.name}`} />
-      <Navbar />
+      <Navbar rightSide={<NavbarRight collectionId={id} />} />
 
       <EditorDisplay collectionId={id} />
     </SWRConfig>

@@ -9,9 +9,15 @@ export interface EditorCardProps {
   item: Item;
   collectionId: string;
   index: number;
+  updating?: boolean;
 }
 
-export const EditorCard = ({ item, collectionId, index }: EditorCardProps) => {
+export const EditorCard = ({
+  item,
+  collectionId,
+  index,
+  updating = false,
+}: EditorCardProps) => {
   const { mutate } = useSWRConfig();
 
   const deleteItem = async () => {
@@ -36,7 +42,12 @@ export const EditorCard = ({ item, collectionId, index }: EditorCardProps) => {
   };
 
   return (
-    <Draggable draggableId={item.id} index={index}>
+    <Draggable
+      draggableId={item.id}
+      index={index}
+      shouldRespectForcePress={updating}
+      isDragDisabled={updating}
+    >
       {(provided) => (
         <section
           ref={provided.innerRef}

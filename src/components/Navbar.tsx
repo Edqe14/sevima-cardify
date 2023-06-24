@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 export interface NavbarProps {
   authenticated?: boolean;
+  rightSide?: React.ReactNode;
 }
 
 const AuthenticatedSection = () => {
@@ -38,7 +39,7 @@ const AuthenticatedSection = () => {
   );
 };
 
-export const Navbar = ({ authenticated = true }: NavbarProps) => {
+export const Navbar = ({ authenticated = true, rightSide }: NavbarProps) => {
   return (
     <nav className="px-8 py-6 flex items-center justify-between w-screen border-b">
       <section className="flex items-center">
@@ -58,7 +59,10 @@ export const Navbar = ({ authenticated = true }: NavbarProps) => {
         </section>
       </section>
 
-      <section>{authenticated && <AuthenticatedSection />}</section>
+      <section className="flex items-center gap-4">
+        {rightSide}
+        {authenticated && <AuthenticatedSection />}
+      </section>
     </nav>
   );
 };
