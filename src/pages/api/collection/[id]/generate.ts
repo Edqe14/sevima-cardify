@@ -78,8 +78,6 @@ router.use(authenticated).post(async (req, res) => {
   const hash = createHash('sha256').update(text).digest('hex');
   let cached = await kv.get<GeneratedMapped>(hash);
 
-  console.log('generate cache: ', cached);
-
   if (!cached) {
     const completion = await agent({
       text,
@@ -91,7 +89,7 @@ router.use(authenticated).post(async (req, res) => {
     }));
 
     await kv.set(hash, mapped);
-    await kv.expire(hash, 5 * 60);
+    await kv.expire(hash, 10 * 60);
 
     cached = mapped;
   }

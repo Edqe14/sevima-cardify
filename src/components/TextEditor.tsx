@@ -151,7 +151,9 @@ export const TextEditor = ({
 
         <RichTextEditor.ControlsGroup>
           <SavingIndicator visible={saving} />
-          {showGenerate && <Generate onClick={onGenerate} />}
+          {showGenerate && (
+            <Generate onClick={onGenerate} generating={generating} />
+          )}
         </RichTextEditor.ControlsGroup>
       </RichTextEditor.Toolbar>
 

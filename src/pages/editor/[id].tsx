@@ -24,9 +24,10 @@ interface Data {
 
 const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
   const [saving, setSaving] = useState(false);
-  const { data, isLoading } = useSWR<DefaultResponse<Data['collection']>>(
-    `/api/collection/${collectionId}`,
-  );
+  const [generating, setGenerating] = useState(false);
+  const { data, isLoading, mutate } = useSWR<
+    DefaultResponse<Data['collection']>
+  >(`/api/collection/${collectionId}`);
 
   const save = useDebouncedCallback(async (editor: EditorType) => {
     setSaving(true);
@@ -61,19 +62,32 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
       if (!confirm) return;
     }
 
-    // TODO: generate
+    setGenerating(true);
+
+    await fetcher(`/api/collection/${collectionId}/generate?confirm=1`, {
+      method: 'POST',
+    });
+
+    setGenerating(false);
+
+    await mutate();
   };
 
   return (
     <section className="grid flex-grow grid-cols-5 overflow-hidden">
       {isLoading && <LoadingOverlay visible={isLoading} />}
 
-      <section className="col-span-2">one</section>
-      <section className="border-l col-span-3 flex flex-col overflow-hidden">
+      <section className="col-span-2">
+        {JSON.stringify(data?.data?.items)}
+      </section>
+      <section className="border-l col-span-3 flex flex-col overflow-hidden relative">
+        <LoadingOverlay visible={generating} className="pointer-events-auto" />
+
         <TextEditor
           content={data?.data?.document as object}
           onUpdate={save}
           saving={saving}
+          generating={generating}
           onGenerate={generateFlashCard}
           showGenerate
         />
