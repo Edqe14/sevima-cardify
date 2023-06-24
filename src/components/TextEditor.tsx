@@ -26,6 +26,16 @@ export interface TextEditorProps {
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = () => {};
 
+export const editorExtensions = [
+  StarterKit,
+  Underline,
+  Link,
+  Superscript,
+  SubScript,
+  Highlight,
+  TextAlign.configure({ types: ['heading', 'paragraph'] }),
+];
+
 const Generate = ({
   onClick = noop,
   generating = false,
@@ -73,15 +83,7 @@ export const TextEditor = ({
   onUpdate = noop,
 }: TextEditorProps) => {
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Underline,
-      Link,
-      Superscript,
-      SubScript,
-      Highlight,
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
-    ],
+    extensions: editorExtensions,
     content,
   });
 
