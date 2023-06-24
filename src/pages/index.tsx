@@ -21,7 +21,7 @@ export default function Home() {
       <Navbar authenticated={status === 'authenticated'} />
 
       <section className="flex flex-col flex-grow items-center pt-36 relative">
-        <h1 className="text-4xl md:text-6xl font-semibold w-80 md:w-[40rem] text-center leading-normal tracking-tight mb-8 text-zinc-800">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold w-80 sm:w-[32rem] lg:w-[40rem] text-center leading-normal sm:leading-normal lg:leading-normal tracking-tight mb-8 text-zinc-800">
           <span className="bg-yellow-300">AI.</span> Powered{' '}
           <span className="bg-yellow-300 text-red-500">Flash Card</span>{' '}
           Generator
