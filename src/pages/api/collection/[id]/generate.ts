@@ -5,9 +5,9 @@ import { prisma } from '@/lib/prisma';
 import { Node } from '@tiptap/pm/model';
 import { getSchema } from '@tiptap/core';
 import { editorExtensions } from '@/components/TextEditor';
-import { Configuration, OpenAIApi } from 'openai';
-import { env } from '@/lib/env.mjs';
-import { assistant, gen, gpt3, map, system, user } from 'salutejs';
+import { davinci } from 'salutejs';
+// import { Configuration, OpenAIApi } from 'openai';
+// import { env } from '@/lib/env.mjs';
 
 const { router, handle } = createApiRouter<DefaultResponse<string>>();
 const schema = getSchema([...editorExtensions]);
@@ -17,23 +17,23 @@ const schema = getSchema([...editorExtensions]);
 //   }),
 // );
 
-const agent = gpt3<{ text: string }>(({ params }) => [
-  system`The user-provided content that need to be summarized and transformed to a "question? answer" format. The answers must be concise and short as possible.`,
-  user`
-    Here is my text:
-    ---
-    ${params.text}
-    ---
-  `,
-  map(
-    'items',
-    new Array(10)
-      .fill(0)
-      .map(() => [
-        assistant`${gen('answer', { maxTokens: 150, temperature: 0.7 })}`,
-      ]),
-  ),
-]);
+const agent = davinci<{ text: string }>(
+  ({ params, ai, gen }) => ai`
+  The following is a text that needs to be summarized and formatted as question and answer pairs.
+
+  Text: ${params.text}
+
+  json
+  {
+    "items": [${[0, 0, 0].map(
+      () => ai`{
+      "question": ${gen('question', { maxTokens: 120 })},
+      "answer": ${gen('answer', { maxTokens: 200 })}
+    },`,
+    )}]
+  }
+`,
+);
 
 router.use(authenticated).post(async (req, res) => {
   if (!req.session) {

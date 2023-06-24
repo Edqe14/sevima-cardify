@@ -2,5 +2,8 @@
   "extends": [
     "next/core-web-vitals",
     "@edqe/eslint-config"
-  ]
+  ],
+  "rules": {
+    "@typescript-eslint/indent": "off"
+  }
 }
