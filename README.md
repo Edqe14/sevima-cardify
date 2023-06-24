@@ -1,7 +1,7 @@
 <div align="center">
 
   <img src="./public/logo.svg" alt="Image" width="128" />
-  <br /><br />
+  <br />
 
   <h1>Cardify</h1>
 
