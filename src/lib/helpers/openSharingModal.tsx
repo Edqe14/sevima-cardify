@@ -24,7 +24,7 @@ const ModalContent = ({ collectionId }: { collectionId: string }) => {
     mutate();
   };
 
-  const publicUrl = new URL(
+  const viewUrl = new URL(
     `/view/${collectionId}`,
     // eslint-disable-next-line no-restricted-globals
     location.origin,
@@ -44,27 +44,25 @@ const ModalContent = ({ collectionId }: { collectionId: string }) => {
         />
       </section>
 
-      {data?.data?.public && (
-        <TextInput
-          label="Public URL"
-          value={publicUrl}
-          onClick={(ev) => {
-            ev.currentTarget.select();
+      <TextInput
+        label="Viewer URL"
+        value={viewUrl}
+        onClick={(ev) => {
+          ev.currentTarget.select();
 
-            copy(publicUrl);
+          copy(viewUrl);
 
-            showNotification({
-              title: 'Copied to clipboard',
-              message: 'Collection URL copied to clipboard',
-              color: 'yellow',
-            });
-          }}
-          classNames={{
-            input: 'text-zinc-500',
-            label: 'text-red-500',
-          }}
-        />
-      )}
+          showNotification({
+            title: 'Copied to clipboard',
+            message: 'Collection URL copied to clipboard',
+            color: 'yellow',
+          });
+        }}
+        classNames={{
+          input: 'text-zinc-500',
+          label: 'text-red-500',
+        }}
+      />
     </section>
   );
 };
