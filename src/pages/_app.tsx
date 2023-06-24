@@ -31,7 +31,11 @@ export default function App({
           emotionCache={mantineCache}
           theme={theme}
         >
-          <ModalsProvider>
+          <ModalsProvider
+            modalProps={{
+              centered: true,
+            }}
+          >
             <Notifications />
             <Component {...pageProps} />
           </ModalsProvider>

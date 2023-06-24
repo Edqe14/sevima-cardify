@@ -6,6 +6,7 @@ import type { Collection } from '@prisma/client';
 import { Button } from '@mantine/core';
 import Head from '@/components/Head';
 import { Plus } from '@phosphor-icons/react';
+import { openCreateCollectionModal } from '@/lib/helpers/openCreateCollectionModal';
 import { authOptions } from './api/auth/[...nextauth]';
 
 export default function Dashboard({
@@ -19,7 +20,11 @@ export default function Dashboard({
       <Navbar />
 
       <main className="p-8">
-        <Button leftIcon={<Plus />} className="mb-6">
+        <Button
+          onClick={() => openCreateCollectionModal()}
+          leftIcon={<Plus />}
+          className="mb-6"
+        >
           Create
         </Button>
 

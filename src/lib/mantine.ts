@@ -9,10 +9,11 @@ export const mantineCache = createEmotionCache({
 export const theme: MantineThemeOverride = {
   fontFamily: 'Poppins, sans-serif',
   colorScheme: 'light',
+
   components: {
     Modal: {
       classNames: {
-        title: 'font-semibold text-lg',
+        title: 'font-semibold text-lg text-red-500 tracking-tight',
       } satisfies ModalProps['classNames'],
     },
   },

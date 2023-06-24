@@ -1,8 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 
-export interface DefaultResponse {
-  error?: string;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface DefaultResponse<T = any> {
+  error?: string | object;
+  data?: T;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
