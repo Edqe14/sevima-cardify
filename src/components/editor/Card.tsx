@@ -1,8 +1,10 @@
 import { fetcher } from '@/lib/api';
 import { confirmWithModal } from '@/lib/helpers/confirmModal';
-import { ActionIcon, TextInput, Textarea } from '@mantine/core';
+import { sleep } from '@/lib/helpers/sleep';
+import { ActionIcon, Loader, TextInput, Textarea } from '@mantine/core';
 import { Trash } from '@phosphor-icons/react';
 import type { Item } from '@prisma/client';
+import { noop } from 'lodash-es';
 import { useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { useSWRConfig } from 'swr';
@@ -13,6 +15,8 @@ export interface EditorCardProps {
   collectionId: string;
   index: number;
   updating?: boolean;
+  onUpdateStart?: () => void;
+  onUpdateEnd?: () => void;
 }
 
 export const EditorCard = ({
@@ -20,10 +24,13 @@ export const EditorCard = ({
   collectionId,
   index,
   updating = false,
+  onUpdateStart = noop,
+  onUpdateEnd = noop,
 }: EditorCardProps) => {
   const { mutate } = useSWRConfig();
   const [question, setQuestion] = useState(item.question);
   const [answer, setAnswer] = useState(item.answer);
+  const [isUpdating, setUpdating] = useState(false);
 
   const deleteItem = async () => {
     const confirm = await confirmWithModal({
@@ -47,6 +54,9 @@ export const EditorCard = ({
   };
 
   const update = useDebouncedCallback(async () => {
+    onUpdateStart();
+    setUpdating(true);
+
     await fetcher(`/api/collection/${collectionId}/item/${item.id}`, {
       method: 'PUT',
       body: JSON.stringify({
@@ -55,7 +65,10 @@ export const EditorCard = ({
       }),
     });
 
-    mutate(`/api/collection/${collectionId}`);
+    await Promise.all([mutate(`/api/collection/${collectionId}`), sleep(200)]);
+
+    onUpdateEnd();
+    setUpdating(false);
   }, 300);
 
   return (
@@ -78,7 +91,12 @@ export const EditorCard = ({
               Question {index + 1}
             </h2>
 
-            <section>
+            <section className="flex gap-2">
+              {isUpdating && (
+                <ActionIcon color="blue" variant="light">
+                  <Loader size={18} />
+                </ActionIcon>
+              )}
               <ActionIcon onClick={deleteItem} color="red" variant="light">
                 <Trash />
               </ActionIcon>

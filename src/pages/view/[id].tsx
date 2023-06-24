@@ -6,23 +6,11 @@ import Head from '@/components/Head';
 import { Navbar } from '@/components/Navbar';
 import { SWRConfig } from 'swr';
 import useSWRImmutable from 'swr/immutable';
-import { fetcher, type DefaultResponse } from '@/lib/api';
-import { Button, LoadingOverlay } from '@mantine/core';
-import { TextEditor } from '@/components/TextEditor';
-import { useEffect, useRef, useState } from 'react';
-import { useDebouncedCallback } from 'use-debounce';
-import type { Editor as EditorType } from '@tiptap/react';
+import { type DefaultResponse } from '@/lib/api';
+import { Button, LoadingOverlay, Progress } from '@mantine/core';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { sleep } from '@/lib/helpers/sleep';
-import { confirmWithModal } from '@/lib/helpers/confirmModal';
-import { EditorCard } from '@/components/editor/Card';
-import {
-  DragDropContext,
-  Droppable,
-  OnDragEndResponder,
-} from 'react-beautiful-dnd';
-import { reorder } from '@/lib/helpers/reorder';
-import { Pencil, Share, X, XCircle } from '@phosphor-icons/react';
-import { openSharingModal } from '@/lib/helpers/openSharingModal';
+import { Pencil, XCircle } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { FlipCard } from '@/components/FlipCard';
@@ -42,6 +30,8 @@ interface Data {
 
 const FlashCard = ({ collectionId }: { collectionId: string }) => {
   const [pickedItem, setPickedItem] = useState<Item | null>(null);
+  const [totalPicks, setTotalPicks] = useState(0);
+  const [totalWrongPicks, setTotalWrongPicks] = useState(0);
   const { data, isLoading } = useSWRImmutable<
     DefaultResponse<Data['collection']>
   >(`/api/collection/${collectionId}`);
@@ -49,20 +39,86 @@ const FlashCard = ({ collectionId }: { collectionId: string }) => {
   const items = data?.data?.items;
   const picks = useRef<WrongList>([]);
 
-  useEffect(() => {
-    if (items) {
-      const random = pickFlashcardByWrongPicks(items, picks.current);
+  const incrementTotal = () => {
+    setTotalPicks((prev) => prev + 1);
+    setTotalWrongPicks(
+      picks.current.reduce((acc, item) => acc + item.wrongCount, 0),
+    );
+  };
+  const pickRandom = useCallback(() => {
+    if (!items) return;
 
-      setPickedItem(random);
-    }
+    const random = pickFlashcardByWrongPicks(items, picks.current);
+
+    setPickedItem(random);
+
+    return random;
   }, [items]);
 
+  useEffect(() => {
+    if (items) pickRandom();
+  }, [items, pickRandom]);
+
+  const markWrong = async () => {
+    if (!pickedItem) return;
+
+    const index = picks.current.findIndex((item) => item.id === pickedItem.id);
+
+    if (index !== -1) {
+      const item = picks.current[index];
+      item.wrongCount += 1;
+    } else {
+      picks.current.push({ id: pickedItem.id, wrongCount: 1 });
+    }
+
+    await sleep(200);
+
+    pickRandom();
+    incrementTotal();
+  };
+
+  const markCorrect = async () => {
+    if (!pickedItem) return;
+
+    const index = picks.current.findIndex((item) => item.id === pickedItem.id);
+
+    if (index !== -1) {
+      const item = picks.current[index];
+      item.wrongCount = Math.max(0, item.wrongCount - 1);
+    }
+
+    await sleep(200);
+
+    pickRandom();
+    incrementTotal();
+  };
+
   return (
-    <section className="flex-grow flex items-center justify-center">
+    <section className="flex-grow flex flex-col items-center justify-center">
       <LoadingOverlay visible={isLoading} />
 
       {pickedItem && (
-        <FlipCard question={pickedItem.question} answer={pickedItem.answer} />
+        <>
+          <FlipCard
+            question={pickedItem.question}
+            answer={pickedItem.answer}
+            onWrong={markWrong}
+            onCorrect={markCorrect}
+            className="mb-24 -mt-8"
+          />
+
+          <section className="w-96 flex flex-col items-center gap-3">
+            <Progress
+              color="green"
+              value={((totalPicks - totalWrongPicks) / totalPicks) * 100}
+              className="w-full bg-red-500"
+              classNames={{
+                bar: 'transition-all duration-500 ease-in-out',
+              }}
+            />
+            <p className="text-zinc-600 font-medium">Correctness %</p>
+          </section>
+        </>
       )}
     </section>
   );

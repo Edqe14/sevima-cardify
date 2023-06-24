@@ -13,6 +13,7 @@ import SubScript from '@tiptap/extension-subscript';
 import { useEffect } from 'react';
 import { Button, Loader } from '@mantine/core';
 import clsx from 'clsx';
+import { noop } from 'lodash-es';
 
 export interface TextEditorProps {
   content?: object | null;
@@ -22,9 +23,6 @@ export interface TextEditorProps {
   onGenerate?: () => void;
   onUpdate?: (editor: Editor) => void;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-const noop = () => {};
 
 export const editorExtensions = [
   StarterKit,
