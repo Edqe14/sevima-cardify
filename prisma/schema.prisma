@@ -45,8 +45,9 @@ model User {
   emailVerified DateTime?
   image         String?
 
-  accounts Account[]
-  sessions Session[]
+  accounts    Account[]
+  sessions    Session[]
+  collections Collection[]
 }
 
 model VerificationToken {
@@ -55,4 +56,37 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Collection {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  public    Boolean  @default(false)
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       Item[]
+  accessLists AccessList[]
+}
+
+model Item {
+  id           String   @id @default(cuid())
+  question     String
+  answer       String
+  collectionId String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+}
+
+model AccessList {
+  id           String @id @default(cuid())
+  collectionId String
+  email        String
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 }
