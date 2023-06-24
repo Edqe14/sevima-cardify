@@ -36,14 +36,16 @@ const ModalContent = ({ modalId }: { modalId: string }) => {
         },
       );
 
-      setLoading(false);
-
       if (res.error || !res.data) {
         form.setFieldError('name', 'Invalid name');
+        setLoading(false);
+
         return;
       }
 
-      router.push(`/editor/${res.data.id}`);
+      await router.push(`/editor/${res.data.id}`);
+
+      setLoading(false);
       closeModal(modalId);
     } catch {
       setLoading(false);
