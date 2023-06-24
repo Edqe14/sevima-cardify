@@ -43,7 +43,7 @@ export const EditorCard = ({ item, collectionId, index }: EditorCardProps) => {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           id={item.id}
-          className="border rounded-md p-4 mb-6 transition-all duration-200 shadow hover:shadow-md"
+          className="border rounded-md p-4 mb-6 transition-all duration-200 shadow hover:shadow-md bg-zinc-50"
         >
           <section className="flex items-center justify-between mb-2">
             <h2 className="text-blue-500 font-semibold">

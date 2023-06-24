@@ -32,6 +32,7 @@ router
 
     const items = await prisma.item.findMany({
       where: { collectionId: req.query.id as string },
+      orderBy: { order: 'asc' },
     });
 
     res.json({ data: items });

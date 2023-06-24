@@ -19,6 +19,7 @@ import {
   Droppable,
   OnDragEndResponder,
 } from 'react-beautiful-dnd';
+import { reorder } from '@/lib/helpers/reorder';
 import { authOptions } from '../api/auth/[...nextauth]';
 
 interface Data {
@@ -92,13 +93,31 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
     }
   };
 
+  const items = data?.data?.items ?? [];
+
   const onDragEnd: OnDragEndResponder = async (result) => {
     if (!result.destination) return;
 
-    console.log(result);
-  };
+    const newItems = reorder(
+      items,
+      result.source.index,
+      result.destination.index,
+    );
 
-  const items = data?.data?.items ?? [];
+    newItems.forEach((item, i) => {
+      // eslint-disable-next-line no-param-reassign
+      item.order = i;
+    });
+
+    const changed = newItems.filter((old, i) => items[i].id !== old.id);
+
+    fetcher(`/api/collection/${collectionId}/item/reorder`, {
+      method: 'PUT',
+      body: JSON.stringify(changed),
+    });
+
+    await mutate();
+  };
 
   return (
     <section className="grid flex-grow grid-cols-5 overflow-hidden">

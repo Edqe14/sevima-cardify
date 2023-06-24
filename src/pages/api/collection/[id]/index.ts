@@ -26,7 +26,11 @@ router
     const collection = await prisma.collection.findFirst({
       where: { id: req.query.id as string },
       include: {
-        items: true,
+        items: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
       },
     });
 
