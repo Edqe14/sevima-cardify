@@ -1,9 +1,12 @@
+import { fetcher } from '@/lib/api';
 import { confirmWithModal } from '@/lib/helpers/confirmModal';
 import { ActionIcon, TextInput, Textarea } from '@mantine/core';
 import { Trash } from '@phosphor-icons/react';
 import type { Item } from '@prisma/client';
+import { useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { useSWRConfig } from 'swr';
+import { useDebouncedCallback } from 'use-debounce';
 
 export interface EditorCardProps {
   item: Item;
@@ -19,6 +22,8 @@ export const EditorCard = ({
   updating = false,
 }: EditorCardProps) => {
   const { mutate } = useSWRConfig();
+  const [question, setQuestion] = useState(item.question);
+  const [answer, setAnswer] = useState(item.answer);
 
   const deleteItem = async () => {
     const confirm = await confirmWithModal({
@@ -40,6 +45,18 @@ export const EditorCard = ({
       mutate(`/api/collection/${collectionId}/item`),
     ]);
   };
+
+  const update = useDebouncedCallback(async () => {
+    await fetcher(`/api/collection/${collectionId}/item/${item.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        question,
+        answer,
+      }),
+    });
+
+    mutate(`/api/collection/${collectionId}`);
+  }, 300);
 
   return (
     <Draggable
@@ -73,7 +90,11 @@ export const EditorCard = ({
             classNames={{
               input: 'focus:bg-blue-50',
             }}
-            value={item.question}
+            value={question}
+            onChange={(ev) => {
+              setQuestion(ev.currentTarget.value);
+              update();
+            }}
           />
           <Textarea
             label="Answer"
@@ -82,7 +103,11 @@ export const EditorCard = ({
               label: 'text-green-500',
               input: 'focus:border-green-500 focus:bg-green-50',
             }}
-            value={item.answer}
+            value={answer}
+            onChange={(ev) => {
+              setAnswer(ev.currentTarget.value);
+              update();
+            }}
           />
         </section>
       )}

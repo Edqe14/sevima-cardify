@@ -10,6 +10,7 @@ const { router, handle } = createApiRouter<DefaultResponse<Collection>>();
 export const collectionBodySchema = z.object({
   name: z.string().min(1).max(255).optional(),
   document: z.record(z.any()).optional(),
+  public: z.boolean().optional(),
 });
 
 router
