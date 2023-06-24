@@ -12,10 +12,10 @@ import { kv } from '@vercel/kv';
 const { router, handle } = createApiRouter<DefaultResponse<string>>();
 const schema = getSchema([...editorExtensions]);
 
-const agent = davinci<
-  { text: string },
-  { question: string[]; answer: string[] }
->(
+type Generated = { question: string[]; answer: string[] };
+type GeneratedMapped = { question: string; answer: string }[];
+
+const agent = davinci<{ text: string }, Generated>(
   ({ params, ai, gen }) => ai`
   The following is a text that needs to be summarized and formatted as question and answer pairs.
 
@@ -54,6 +54,7 @@ router.use(authenticated).post(async (req, res) => {
     select: {
       userId: true,
       document: true,
+      id: true,
     },
   });
 
@@ -75,9 +76,9 @@ router.use(authenticated).post(async (req, res) => {
   const text = node.textContent;
 
   const hash = createHash('sha256').update(text).digest('hex');
-  const cached = await kv.get(hash);
+  let cached = await kv.get<GeneratedMapped>(hash);
 
-  console.log(cached);
+  console.log('generate cache: ', cached);
 
   if (!cached) {
     const completion = await agent({
@@ -92,10 +93,24 @@ router.use(authenticated).post(async (req, res) => {
     await kv.set(hash, mapped);
     await kv.expire(hash, 5 * 60);
 
-    console.log(mapped);
+    cached = mapped;
   }
 
-  res.json({ message: 'Generated', data: cached });
+  await prisma.$transaction([
+    prisma.item.deleteMany({
+      where: { collectionId: collection.id },
+    }),
+    prisma.item.createMany({
+      data: cached.map((item) => ({
+        question: item.question,
+        answer: item.answer,
+        collectionId: collection.id,
+      })),
+      skipDuplicates: true,
+    }),
+  ]);
+
+  res.json({ message: 'Generated' });
 });
 
 export default handle();
