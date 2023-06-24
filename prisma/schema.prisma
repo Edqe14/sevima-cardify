@@ -59,17 +59,17 @@ model VerificationToken {
 }
 
 model Collection {
-  id        String   @id @default(cuid())
-  name      String
-  document  Json?
-  public    Boolean  @default(false)
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  name       String
+  document   Json?
+  public     Boolean  @default(false)
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  accessList Json[]   @default([])
 
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items       Item[]
-  accessLists AccessList[]
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items Item[]
 }
 
 model Item {
@@ -80,14 +80,6 @@ model Item {
   order        Int
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
-  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-}
-
-model AccessList {
-  id           String @id @default(cuid())
-  collectionId String
-  email        String
 
   collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 }

@@ -1,10 +1,17 @@
-import { LoadingOverlay, Switch, TextInput } from '@mantine/core';
+import {
+  Badge,
+  LoadingOverlay,
+  MultiSelect,
+  Switch,
+  TextInput,
+} from '@mantine/core';
 import { openModal } from '@mantine/modals';
 import useSWR from 'swr';
 import type { Collection } from '@prisma/client';
-import { ChangeEventHandler } from 'react';
+import { ChangeEventHandler, useEffect, useState } from 'react';
 import { useClipboard } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
+import { string } from 'zod';
 import { fetcher, type DefaultResponse } from '../api';
 
 const ModalContent = ({ collectionId }: { collectionId: string }) => {
@@ -13,11 +20,31 @@ const ModalContent = ({ collectionId }: { collectionId: string }) => {
     `/api/collection/${collectionId}`,
   );
 
+  const [users, setUsers] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (isLoading || !data) return;
+
+    setUsers((data.data?.accessList as string[]) ?? []);
+  }, [data, isLoading]);
+
   const updateVisibility: ChangeEventHandler<HTMLInputElement> = async (ev) => {
     await fetcher(`/api/collection/${collectionId}`, {
       method: 'PUT',
       body: JSON.stringify({
         public: ev.target.checked,
+        accessList: users,
+      }),
+    });
+
+    mutate();
+  };
+
+  const updateAccess = async (value?: string[]) => {
+    await fetcher(`/api/collection/${collectionId}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        accessList: value ?? users,
       }),
     });
 
@@ -43,6 +70,41 @@ const ModalContent = ({ collectionId }: { collectionId: string }) => {
           onChange={updateVisibility}
         />
       </section>
+
+      <MultiSelect
+        label="Access List"
+        description="User Emails"
+        className="mb-3"
+        clearable
+        creatable
+        searchable
+        data={users}
+        value={users}
+        getCreateLabel={(query) => (
+          <p>
+            + Create <Badge color="teal">{query}</Badge>
+          </p>
+        )}
+        onChange={(value) => {
+          setUsers(value);
+          updateAccess(value);
+        }}
+        onCreate={(query) => {
+          if (!string().email().safeParse(query).success) {
+            return;
+          }
+
+          setUsers((current) => {
+            const newAccess = [...current, query];
+
+            updateAccess(newAccess);
+
+            return newAccess;
+          });
+
+          return query;
+        }}
+      />
 
       <TextInput
         label="Viewer URL"

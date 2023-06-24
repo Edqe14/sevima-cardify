@@ -190,7 +190,6 @@ export const getServerSideProps: GetServerSideProps<Data> = async (context) => {
     },
     include: {
       items: true,
-      accessLists: true,
     },
   });
 
@@ -204,9 +203,7 @@ export const getServerSideProps: GetServerSideProps<Data> = async (context) => {
     (!session && !collection.public) ||
     (session &&
       session.user.id !== collection.userId &&
-      !collection.accessLists.find(
-        (list) => list.email === session.user.email,
-      ) &&
+      !collection.accessList.find((email) => email === session.user.email) &&
       !collection.public)
   ) {
     return {
