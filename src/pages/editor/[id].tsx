@@ -13,6 +13,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import type { Editor as EditorType } from '@tiptap/react';
 import { sleep } from '@/lib/helpers/sleep';
 import { confirmWithModal } from '@/lib/helpers/confirmModal';
+import { EditorCard } from '@/components/editor/Card';
 import { authOptions } from '../api/auth/[...nextauth]';
 
 interface Data {
@@ -73,13 +74,22 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
     await mutate();
   };
 
+  const items = data?.data?.items ?? [];
+
   return (
     <section className="grid flex-grow grid-cols-5 overflow-hidden">
       {isLoading && <LoadingOverlay visible={isLoading} />}
 
-      <section className="col-span-2">
-        {JSON.stringify(data?.data?.items)}
+      <section className="col-span-2 p-6 overflow-y-auto">
+        {items.length === 0 && (
+          <p className="text-zinc-500">Your flash cards will show here</p>
+        )}
+
+        {items.map((item) => (
+          <EditorCard key={item.id} item={item} collectionId={collectionId} />
+        ))}
       </section>
+
       <section className="border-l col-span-3 flex flex-col overflow-hidden relative">
         <LoadingOverlay visible={generating} className="pointer-events-auto" />
 
