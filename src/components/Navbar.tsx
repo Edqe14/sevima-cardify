@@ -41,12 +41,21 @@ const AuthenticatedSection = () => {
 export const Navbar = ({ authenticated = true }: NavbarProps) => {
   return (
     <nav className="px-8 py-6 flex items-center justify-between w-screen border-b">
-      <section>
-        <Link href={authenticated ? '/dashboard' : '/'}>
-          <h1 className="font-semibold text-xl tracking-tighter text-red-500">
+      <section className="flex items-center">
+        <Link href="/" className="mr-8">
+          <h1 className="font-semibold text-2xl tracking-tighter text-red-500">
             Cardify
           </h1>
         </Link>
+
+        <section className="flex gap-3 text-zinc-600 items-center">
+          <Link
+            href="/dashboard"
+            className="transition-colors duration-200 hover:text-zinc-700 "
+          >
+            Dashboard
+          </Link>
+        </section>
       </section>
 
       <section>{authenticated && <AuthenticatedSection />}</section>

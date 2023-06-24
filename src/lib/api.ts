@@ -7,6 +7,7 @@ import { patchSuperJSON } from './helpers/patchSuperJSON';
 export interface DefaultResponse<T = any> {
   error?: string | object;
   data?: T;
+  message?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

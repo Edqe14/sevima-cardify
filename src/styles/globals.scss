@@ -3,5 +3,9 @@
 @tailwind utilities;
 
 body {
-  @apply font-poppins text-zinc-800 dark:text-white #{!important};
+  @apply font-poppins text-zinc-800 dark:text-white overflow-hidden #{!important};
+}
+
+#__next {
+  @apply flex flex-col h-screen overflow-hidden;
 }

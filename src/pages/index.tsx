@@ -63,16 +63,9 @@ export default function Home() {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);
 
-  if (session) {
-    return {
-      redirect: {
-        destination: '/dashboard',
-        permanent: true,
-      },
-    };
-  }
-
   return {
-    props: {},
+    props: {
+      session,
+    },
   };
 };

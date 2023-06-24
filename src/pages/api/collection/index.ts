@@ -9,6 +9,7 @@ const { router, handle } =
 
 export const collectionBodySchema = z.object({
   name: z.string().min(1).max(255),
+  document: z.record(z.any()).optional(),
 });
 
 router
@@ -38,6 +39,7 @@ router
     const collection = await prisma.collection.create({
       data: {
         name: parsed.data.name,
+        document: parsed.data.document,
         userId: req.session.user.id,
       },
     });
