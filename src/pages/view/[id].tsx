@@ -100,17 +100,22 @@ const FlashCard = ({ collectionId }: { collectionId: string }) => {
       {pickedItem && (
         <>
           <FlipCard
+            total={totalPicks}
             question={pickedItem.question}
             answer={pickedItem.answer}
             onWrong={markWrong}
             onCorrect={markCorrect}
-            className="mb-24 -mt-8"
+            className="mb-24 -mt-16 lg:-mt-8"
           />
 
-          <section className="w-96 flex flex-col items-center gap-3">
+          <section className="w-64 sm:w-80 md:w-96 flex flex-col items-center gap-3">
             <Progress
               color="green"
-              value={((totalPicks - totalWrongPicks) / totalPicks) * 100}
+              value={
+                totalPicks === 0
+                  ? 100
+                  : ((totalPicks - totalWrongPicks) / totalPicks) * 100
+              }
               className="w-full bg-red-500"
               classNames={{
                 bar: 'transition-all duration-500 ease-in-out',
