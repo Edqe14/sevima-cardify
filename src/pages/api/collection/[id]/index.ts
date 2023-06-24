@@ -25,10 +25,17 @@ router
 
     const collection = await prisma.collection.findFirst({
       where: { id: req.query.id as string },
+      include: {
+        items: true,
+      },
     });
 
     if (!collection) {
       return res.status(404).json({ error: 'Not found' });
+    }
+
+    if (req.session.user.id !== collection.userId && !collection.public) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
 
     res.json({ data: collection });
@@ -42,13 +49,29 @@ router
       return res.status(400).json({ error: 'Bad request' });
     }
 
+    const collection = await prisma.collection.findFirst({
+      where: { id: req.query.id as string },
+      select: {
+        userId: true,
+        public: true,
+      },
+    });
+
+    if (!collection) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    if (req.session.user.id !== collection.userId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
     const parsed = collectionBodySchema.safeParse(req.body);
 
     if (!parsed.success) {
       return res.status(422).json({ error: parsed.error.errors });
     }
 
-    const collection = await prisma.collection.update({
+    await prisma.collection.update({
       data: omitBy(
         {
           name: parsed.data.name,
@@ -61,7 +84,7 @@ router
       },
     });
 
-    res.json({ data: collection });
+    res.json({ message: 'Updated' });
   })
   .delete(async (req, res) => {
     if (!req.session) {
@@ -70,6 +93,22 @@ router
 
     if (!req.query.id) {
       return res.status(400).json({ error: 'Bad request' });
+    }
+
+    const collection = await prisma.collection.findFirst({
+      where: { id: req.query.id as string },
+      select: {
+        userId: true,
+        public: true,
+      },
+    });
+
+    if (!collection) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    if (req.session.user.id !== collection.userId) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
 
     await prisma.collection.delete({

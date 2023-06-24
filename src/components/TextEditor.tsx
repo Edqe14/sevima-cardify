@@ -1,4 +1,8 @@
-import { RichTextEditor, Link } from '@mantine/tiptap';
+import {
+  RichTextEditor,
+  Link,
+  useRichTextEditorContext,
+} from '@mantine/tiptap';
 import { type Editor, useEditor } from '@tiptap/react';
 import Highlight from '@tiptap/extension-highlight';
 import StarterKit from '@tiptap/starter-kit';
@@ -13,6 +17,7 @@ import clsx from 'clsx';
 export interface TextEditorProps {
   content?: object | null;
   saving?: boolean;
+  generating?: boolean;
   showGenerate?: boolean;
   onGenerate?: () => void;
   onUpdate?: (editor: Editor) => void;
@@ -21,11 +26,26 @@ export interface TextEditorProps {
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = () => {};
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const Generate = ({ onClick = noop }: { onClick?: () => any }) => {
+const Generate = ({
+  onClick = noop,
+  generating = false,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onClick?: () => any;
+  generating?: boolean;
+}) => {
+  const { editor } = useRichTextEditorContext();
+
   return (
-    <RichTextEditor.Control className="border-none">
-      <Button onClick={onClick}>Generate</Button>
+    <RichTextEditor.Control className="border-none ml-2">
+      <Button
+        onClick={onClick}
+        disabled={editor?.getText()?.trim()?.length === 0 || generating}
+        loading={generating}
+        px="sm"
+      >
+        Generate
+      </Button>
     </RichTextEditor.Control>
   );
 };
@@ -48,6 +68,7 @@ export const TextEditor = ({
   content,
   saving = false,
   showGenerate = false,
+  generating = false,
   onGenerate = noop,
   onUpdate = noop,
 }: TextEditorProps) => {

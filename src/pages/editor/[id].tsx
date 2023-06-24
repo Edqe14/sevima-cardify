@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import type { GetServerSideProps } from 'next';
 import { getServerSession } from 'next-auth';
-import type { Collection } from '@prisma/client';
+import type { Collection, Item } from '@prisma/client';
 import Head from '@/components/Head';
 import { Navbar } from '@/components/Navbar';
 import useSWR, { SWRConfig } from 'swr';
@@ -12,16 +12,19 @@ import { useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import type { Editor as EditorType } from '@tiptap/react';
 import { sleep } from '@/lib/helpers/sleep';
+import { confirmWithModal } from '@/lib/helpers/confirmModal';
 import { authOptions } from '../api/auth/[...nextauth]';
 
 interface Data {
   id: string;
-  collection: Collection;
+  collection: Collection & {
+    items: Item[];
+  };
 }
 
 const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
   const [saving, setSaving] = useState(false);
-  const { data, isLoading } = useSWR<DefaultResponse<Collection>>(
+  const { data, isLoading } = useSWR<DefaultResponse<Data['collection']>>(
     `/api/collection/${collectionId}`,
   );
 
@@ -38,9 +41,28 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
       sleep(300),
     ]);
 
-    console.log('save to db', editor);
     setSaving(false);
   }, 500);
+
+  const generateFlashCard = async () => {
+    if (!data) return;
+
+    if (data.data?.items && data.data.items.length > 0) {
+      const confirm = await confirmWithModal({
+        title: 'Are you sure?',
+        children: (
+          <p>
+            This action is destructive (will remove your old flash cards) and
+            generate new ones.
+          </p>
+        ),
+      });
+
+      if (!confirm) return;
+    }
+
+    // TODO: generate
+  };
 
   return (
     <section className="grid flex-grow grid-cols-5 overflow-hidden">
@@ -52,7 +74,7 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
           content={data?.data?.document as object}
           onUpdate={save}
           saving={saving}
-          onGenerate={() => console.log('generate')}
+          onGenerate={generateFlashCard}
           showGenerate
         />
       </section>
@@ -94,6 +116,9 @@ export const getServerSideProps: GetServerSideProps<Data> = async (context) => {
   const collection = await prisma.collection.findFirst({
     where: {
       id,
+    },
+    include: {
+      items: true,
     },
   });
 

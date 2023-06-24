@@ -5,7 +5,7 @@ import type { Collection } from '@prisma/client';
 import { z } from 'zod';
 
 const { router, handle } =
-  createApiRouter<DefaultResponse<Collection[] | Collection>>();
+  createApiRouter<DefaultResponse<Partial<Collection>[] | Collection>>();
 
 export const collectionBodySchema = z.object({
   name: z.string().min(1).max(255),
@@ -21,6 +21,14 @@ router
 
     const collections = await prisma.collection.findMany({
       where: { userId: req.session.user.id },
+      select: {
+        id: true,
+        name: true,
+        public: true,
+        userId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     res.json({ data: collections });

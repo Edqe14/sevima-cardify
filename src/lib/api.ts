@@ -27,6 +27,9 @@ export const createApiRouter = <Data extends DefaultResponse>() => {
         console.error(err);
         res.status(500).json({ error: 'Something went wrong' } as Data);
       },
+      onNoMatch: (_, res) => {
+        res.status(404).json({ error: 'Not found' } as Data);
+      },
     });
 
   return { router, handle };
