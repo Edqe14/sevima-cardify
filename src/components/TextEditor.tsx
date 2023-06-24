@@ -104,11 +104,7 @@ export const TextEditor = ({
       editor={editor}
       className="flex-grow border-none flex flex-col relative overflow-y-auto"
     >
-      <RichTextEditor.Toolbar
-        sticky
-        // stickyOffset={60}
-        className="border-b-zinc-200"
-      >
+      <RichTextEditor.Toolbar sticky className="border-b-zinc-200">
         <RichTextEditor.ControlsGroup>
           <RichTextEditor.Bold />
           <RichTextEditor.Italic />

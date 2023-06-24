@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply font-poppins text-zinc-800 dark:text-white overflow-hidden #{!important};
+  @apply font-poppins text-zinc-800 dark:text-white bg-zinc-50 dark:bg-zinc-800 overflow-hidden #{!important};
 }
 
 #__next {

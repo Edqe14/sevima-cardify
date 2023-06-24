@@ -6,14 +6,19 @@ import Head from '@/components/Head';
 import { Navbar } from '@/components/Navbar';
 import useSWR, { SWRConfig } from 'swr';
 import { fetcher, type DefaultResponse } from '@/lib/api';
-import { LoadingOverlay } from '@mantine/core';
+import { Button, LoadingOverlay } from '@mantine/core';
 import { TextEditor } from '@/components/TextEditor';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import type { Editor as EditorType } from '@tiptap/react';
 import { sleep } from '@/lib/helpers/sleep';
 import { confirmWithModal } from '@/lib/helpers/confirmModal';
 import { EditorCard } from '@/components/editor/Card';
+import {
+  DragDropContext,
+  Droppable,
+  OnDragEndResponder,
+} from 'react-beautiful-dnd';
 import { authOptions } from '../api/auth/[...nextauth]';
 
 interface Data {
@@ -26,6 +31,7 @@ interface Data {
 const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const cardsRef = useRef<HTMLDivElement>(null);
   const { data, isLoading, mutate } = useSWR<
     DefaultResponse<Data['collection']>
   >(`/api/collection/${collectionId}`);
@@ -74,20 +80,63 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
     await mutate();
   };
 
+  const createEmptyCard = async () => {
+    await fetcher(`/api/collection/${collectionId}/item`, {
+      method: 'POST',
+    });
+
+    await mutate();
+
+    if (cardsRef.current) {
+      cardsRef.current.scrollTop = cardsRef.current.scrollHeight;
+    }
+  };
+
+  const onDragEnd: OnDragEndResponder = async (result) => {
+    if (!result.destination) return;
+
+    console.log(result);
+  };
+
   const items = data?.data?.items ?? [];
 
   return (
     <section className="grid flex-grow grid-cols-5 overflow-hidden">
       {isLoading && <LoadingOverlay visible={isLoading} />}
 
-      <section className="col-span-2 p-6 overflow-y-auto">
-        {items.length === 0 && (
-          <p className="text-zinc-500">Your flash cards will show here</p>
-        )}
+      <section className="col-span-2 overflow-hidden flex flex-col">
+        <section
+          className={`flex p-6 ${
+            items.length === 0 ? 'justify-between' : 'justify-end'
+          } items-center`}
+        >
+          {items.length === 0 && (
+            <p className="text-zinc-500">Your flash cards will show here</p>
+          )}
 
-        {items.map((item) => (
-          <EditorCard key={item.id} item={item} collectionId={collectionId} />
-        ))}
+          <Button onClick={createEmptyCard}>Create Card</Button>
+        </section>
+
+        <section className="overflow-y-auto p-6 pt-0" ref={cardsRef}>
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="cards">
+              {(provided) => (
+                <section {...provided.droppableProps} ref={provided.innerRef}>
+                  {items.map((item, i) => (
+                    <EditorCard
+                      key={item.id}
+                      item={item}
+                      index={i}
+                      collectionId={collectionId}
+                    />
+                  ))}
+
+                  {provided.placeholder}
+                </section>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </section>
       </section>
 
       <section className="border-l col-span-3 flex flex-col overflow-hidden relative">

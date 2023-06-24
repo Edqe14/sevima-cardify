@@ -14,6 +14,7 @@ export const theme: MantineThemeOverride = {
     Modal: {
       classNames: {
         title: 'font-semibold text-lg text-red-500 tracking-tight',
+        content: 'text-zinc-700',
       } satisfies ModalProps['classNames'],
     },
   },

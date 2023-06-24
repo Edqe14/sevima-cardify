@@ -1,15 +1,15 @@
 import { type DefaultResponse, createApiRouter } from '@/lib/api';
 import { authenticated } from '@/lib/middlewares/authenticated';
 import { prisma } from '@/lib/prisma';
-import type { Collection } from '@prisma/client';
+import type { Item } from '@prisma/client';
 import { isNil, omitBy } from 'lodash-es';
 import { z } from 'zod';
 
-const { router, handle } = createApiRouter<DefaultResponse<Collection>>();
+const { router, handle } = createApiRouter<DefaultResponse<Item>>();
 
-export const collectionBodySchema = z.object({
-  name: z.string().min(1).max(255).optional(),
-  document: z.record(z.any()).optional(),
+export const itemBodySchema = z.object({
+  question: z.string().max(255).optional(),
+  answer: z.string().max(1000).optional(),
 });
 
 router
@@ -19,15 +19,12 @@ router
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    if (!req.query.id) {
+    if (!req.query.id || !req.query.tId) {
       return res.status(400).json({ error: 'Bad request' });
     }
 
     const collection = await prisma.collection.findFirst({
       where: { id: req.query.id as string },
-      include: {
-        items: true,
-      },
     });
 
     if (!collection) {
@@ -38,7 +35,15 @@ router
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    res.json({ data: collection });
+    const item = await prisma.item.findFirst({
+      where: { id: req.query.tId as string },
+    });
+
+    if (!item) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    res.json({ data: item });
   })
   .put(async (req, res) => {
     if (!req.session) {
@@ -65,20 +70,24 @@ router
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    const parsed = collectionBodySchema.safeParse(req.body);
+    const parsed = itemBodySchema.safeParse(req.body);
 
     if (!parsed.success) {
       return res.status(422).json({ error: parsed.error.errors });
     }
 
-    await prisma.collection.update({
-      data: omitBy(parsed.data, isNil),
-      where: {
-        id: req.query.id as string,
-      },
-    });
+    try {
+      await prisma.item.update({
+        data: omitBy(parsed.data, isNil),
+        where: {
+          id: req.query.tId as string,
+        },
+      });
 
-    res.json({ message: 'Updated' });
+      res.json({ message: 'Updated' });
+    } catch {
+      return res.status(404).json({ error: 'Not found' });
+    }
   })
   .delete(async (req, res) => {
     if (!req.session) {
@@ -105,13 +114,17 @@ router
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    await prisma.collection.delete({
-      where: {
-        id: req.query.id as string,
-      },
-    });
+    try {
+      await prisma.item.delete({
+        where: {
+          id: req.query.tId as string,
+        },
+      });
 
-    res.json({ message: 'Deleted' });
+      res.json({ message: 'Deleted' });
+    } catch {
+      return res.status(404).json({ error: 'Not found' });
+    }
   });
 
 export default handle();

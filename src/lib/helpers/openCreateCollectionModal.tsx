@@ -1,6 +1,6 @@
 import { Button, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { openModal } from '@mantine/modals';
+import { closeModal, openModal } from '@mantine/modals';
 import { generate } from 'random-words';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
@@ -8,7 +8,7 @@ import type { Collection } from '@prisma/client';
 import { showNotification } from '@mantine/notifications';
 import { DefaultResponse, fetcher } from '../api';
 
-const ModalContent = () => {
+const ModalContent = ({ modalId }: { modalId: string }) => {
   const router = useRouter();
   const generatedName = useMemo(() => generate(3).join(' '), []);
   const [loading, setLoading] = useState(false);
@@ -44,6 +44,7 @@ const ModalContent = () => {
       }
 
       router.push(`/editor/${res.data.id}`);
+      closeModal(modalId);
     } catch {
       setLoading(false);
 
@@ -76,11 +77,11 @@ const ModalContent = () => {
   );
 };
 
-export const openCreateCollectionModal = (id?: string) => {
+export const openCreateCollectionModal = (id = 'create-collection') => {
   return openModal({
-    modalId: id ?? 'create-collection',
+    modalId: id,
     title: 'Create Collection',
     size: 'sm',
-    children: <ModalContent />,
+    children: <ModalContent modalId={id} />,
   });
 };

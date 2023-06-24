@@ -99,9 +99,10 @@ router.use(authenticated).post(async (req, res) => {
       where: { collectionId: collection.id },
     }),
     prisma.item.createMany({
-      data: cached.map((item) => ({
+      data: cached.map((item, i) => ({
         question: item.question,
         answer: item.answer,
+        order: i,
         collectionId: collection.id,
       })),
       skipDuplicates: true,
