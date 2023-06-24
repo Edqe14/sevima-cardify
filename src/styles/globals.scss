@@ -15,5 +15,5 @@ body {
 }
 
 .ProseMirror {
-  @apply h-full lg:px-72 2xl:px-80 py-8 #{!important};
+  @apply h-full pb-16 lg:pt-8 lg:px-32 xl:px-48 2xl:px-72 #{!important};
 }

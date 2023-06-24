@@ -20,8 +20,9 @@ import {
   OnDragEndResponder,
 } from 'react-beautiful-dnd';
 import { reorder } from '@/lib/helpers/reorder';
-import { Share } from '@phosphor-icons/react';
+import { CaretLeft, Share } from '@phosphor-icons/react';
 import { openSharingModal } from '@/lib/helpers/openSharingModal';
+import clsx from 'clsx';
 import { authOptions } from '../api/auth/[...nextauth]';
 
 interface Data {
@@ -35,6 +36,7 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [openDrawer, setOpenDrawer] = useState(false);
   const cardsRef = useRef<HTMLDivElement>(null);
   const { data, isLoading, mutate } = useSWR<
     DefaultResponse<Data['collection']>
@@ -96,6 +98,8 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
     }
   };
 
+  const toggleDrawer = () => setOpenDrawer((prev) => !prev);
+
   const items = data?.data?.items ?? [];
 
   const onDragEnd: OnDragEndResponder = async (result) => {
@@ -127,10 +131,10 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
   };
 
   return (
-    <section className="grid flex-grow grid-cols-6 overflow-hidden">
+    <section className="grid flex-grow grid-cols-6 overflow-hidden relative">
       {isLoading && <LoadingOverlay visible={isLoading} />}
 
-      <section className="col-span-2 overflow-hidden flex flex-col">
+      <section className="col-span-full lg:col-span-2 overflow-hidden flex flex-col">
         <section
           className={`flex px-6 py-[10px] h-[47px] ${
             items.length === 0 ? 'justify-between' : 'justify-end'
@@ -166,10 +170,26 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
         </section>
       </section>
 
-      <section className="border-l col-span-4 flex flex-col overflow-hidden relative">
+      <span
+        className={clsx(
+          'block bg-zinc-900 absolute inset-0 lg:hidden transition-opacity duration-200',
+          openDrawer
+            ? 'opacity-50 pointer-events-auto'
+            : 'opacity-0 pointer-events-none',
+        )}
+        onClick={toggleDrawer}
+      />
+
+      <section
+        className={clsx(
+          'border-l col-span-4 flex flex-col overflow-hidden absolute top-0 right-0 z-10 h-full w-full md:w-[42rem] lg:w-auto lg:relative transition-all duration-300',
+          openDrawer ? 'translate-x-0' : 'translate-x-full lg:translate-x-0',
+        )}
+      >
         <LoadingOverlay visible={generating} className="pointer-events-auto" />
 
         <TextEditor
+          className="relative"
           content={data?.data?.document as object}
           onUpdate={save}
           saving={saving}
@@ -178,6 +198,20 @@ const EditorDisplay = ({ collectionId }: { collectionId: string }) => {
           showGenerate
         />
       </section>
+
+      <span
+        onClick={toggleDrawer}
+        className="cursor-pointer fixed rounded-full bottom-8 right-12 grid place-items-center z-50 lg:hidden lg:scale-0 bg-red-500 w-12 h-12"
+      >
+        <CaretLeft
+          className={clsx(
+            'text-white transition-all duration-200 ease-in-out',
+            openDrawer && 'rotate-180',
+          )}
+          weight="bold"
+          size={20}
+        />
+      </span>
     </section>
   );
 };

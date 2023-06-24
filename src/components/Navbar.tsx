@@ -18,7 +18,7 @@ const AuthenticatedSection = () => {
 
   return (
     <>
-      <Menu position="bottom-end" offset={15}>
+      <Menu position="bottom-end" offset={15} width={200}>
         <Menu.Target>
           <Image
             src={data?.user?.image as string}
@@ -49,7 +49,7 @@ export const Navbar = ({ authenticated = true, rightSide }: NavbarProps) => {
           </h1>
         </Link>
 
-        <section className="flex gap-3 text-zinc-600 items-center">
+        <section className="gap-3 text-zinc-600 items-center hidden lg:flex">
           <Link
             href="/dashboard"
             className="transition-colors duration-200 hover:text-zinc-700 "

@@ -20,6 +20,7 @@ export interface TextEditorProps {
   saving?: boolean;
   generating?: boolean;
   showGenerate?: boolean;
+  className?: string;
   onGenerate?: () => void;
   onUpdate?: (editor: Editor) => void;
 }
@@ -77,6 +78,7 @@ export const TextEditor = ({
   saving = false,
   showGenerate = false,
   generating = false,
+  className,
   onGenerate = noop,
   onUpdate = noop,
 }: TextEditorProps) => {
@@ -100,7 +102,10 @@ export const TextEditor = ({
   return (
     <RichTextEditor
       editor={editor}
-      className="flex-grow border-none flex flex-col relative overflow-y-auto"
+      className={clsx(
+        'flex-grow border-none flex flex-col overflow-y-auto',
+        className,
+      )}
     >
       <RichTextEditor.Toolbar sticky className="border-b-zinc-200">
         <RichTextEditor.ControlsGroup>
