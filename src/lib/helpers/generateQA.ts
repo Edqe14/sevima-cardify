@@ -67,6 +67,6 @@ export const generateQA = async (
   try {
     return JSON.parse(cleaned) as GeneratedQA;
   } catch {
-    return null;
+    throw new Error('Failed to parse JSON');
   }
 };

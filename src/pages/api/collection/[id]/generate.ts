@@ -72,6 +72,7 @@ router.use(authenticated).post(async (req, res) => {
 
       cached = completion.items;
     } catch (e: any) {
+      console.error(e);
       return res.status(500).json({ error: e.message });
     }
   }
