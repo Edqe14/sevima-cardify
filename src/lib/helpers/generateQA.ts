@@ -1,8 +1,9 @@
 import { OpenAI } from 'openai';
+import { env } from '../env.mjs';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || 'asdada',
-  baseURL: process.env.OPENAI_API_URL ?? 'https://api.openai.com/v1',
+  apiKey: env.OPENAI_API_KEY || 'asdada',
+  baseURL: env.OPENAI_API_URL ?? 'https://api.openai.com/v1',
 });
 
 type GeneratedQA = {
