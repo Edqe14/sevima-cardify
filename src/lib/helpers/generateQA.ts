@@ -59,8 +59,6 @@ export const generateQA = async (text: string, tries = 0, max = 3): Promise<Gene
   try {
     return JSON.parse(cleaned) as GeneratedQA;
   } catch {
-    await sleep(1000);
-
-    return generateQA(text, tries + 1, max);
+    return null;
   }
 }
