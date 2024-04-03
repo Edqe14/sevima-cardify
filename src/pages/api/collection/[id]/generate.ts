@@ -5,15 +5,23 @@ import { prisma } from '@/lib/prisma';
 import { Node } from '@tiptap/pm/model';
 import { getSchema } from '@tiptap/core';
 import { editorExtensions } from '@/components/TextEditor';
-import { davinci } from 'salutejs';
 import { createHash } from 'crypto';
 import { kv } from '@vercel/kv';
+import { createOpenAICompletion } from 'salutejs';
 
 const { router, handle } = createApiRouter<DefaultResponse<string>>();
 const schema = getSchema([...editorExtensions]);
 
 type Generated = { question: string[]; answer: string[] };
 type GeneratedMapped = { question: string; answer: string }[];
+
+const davinci = createOpenAICompletion(
+  { model: "text-davinci-003" },
+  {
+    apiKey: process.env.OPENAI_API_KEY,
+    basePath: process.env.OPENAI_API_URL ?? 'https://api.openai.com/v1',
+  }
+);
 
 const agent = davinci<{ text: string }, Generated>(
   ({ params, ai, gen }) => ai`
