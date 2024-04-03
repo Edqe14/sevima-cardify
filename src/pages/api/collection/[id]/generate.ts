@@ -7,43 +7,12 @@ import { getSchema } from '@tiptap/core';
 import { editorExtensions } from '@/components/TextEditor';
 import { createHash } from 'crypto';
 import { kv } from '@vercel/kv';
-import { createOpenAICompletion } from 'salutejs';
+import { generateQA } from '@/lib/helpers/generateQA';
 
 const { router, handle } = createApiRouter<DefaultResponse<string>>();
 const schema = getSchema([...editorExtensions]);
 
-type Generated = { question: string[]; answer: string[] };
 type GeneratedMapped = { question: string; answer: string }[];
-
-const davinci = createOpenAICompletion(
-  { model: 'text-davinci-003' },
-  {
-    apiKey: process.env.OPENAI_API_KEY,
-    basePath: process.env.OPENAI_API_URL ?? 'https://api.openai.com/v1',
-  },
-);
-
-const agent = davinci<{ text: string }, Generated>(
-  ({ params, ai, gen }) => ai`
-  The following is a text that needs to be summarized and formatted as question and answer pairs.
-
-  Text: ${params.text}
-
-  json
-  {
-    "items": [${new Array(10).fill(0).map(
-      () => ai`{
-      "question": "${gen('question', {
-        maxTokens: 80,
-        temperature: 0,
-        topP: 1,
-      })}",
-      "answer": "${gen('answer', { maxTokens: 200 })}"
-    },`,
-    )}]
-  }
-`,
-);
 
 router.use(authenticated).post(async (req, res) => {
   if (!req.session) {
@@ -91,19 +60,20 @@ router.use(authenticated).post(async (req, res) => {
   let cached = await kv.get<GeneratedMapped>(hash);
 
   if (!cached) {
-    const completion = await agent({
-      text,
-    });
+    try {
+      const completion = await generateQA(text);
 
-    const mapped = completion.question.map((question, i) => ({
-      question,
-      answer: completion.answer[i],
-    }));
+      if (!completion) {
+        return res.status(422).json({ error: 'Failed to generate' });
+      }
 
-    await kv.set(hash, mapped);
-    await kv.expire(hash, 10 * 60);
-
-    cached = mapped;
+      await kv.set(hash, completion.items);
+      await kv.expire(hash, 10 * 60);
+  
+      cached = completion.items;
+    } catch (e: any) {
+      return res.status(500).json({ error: e.message });
+    }
   }
 
   await prisma.$transaction([
