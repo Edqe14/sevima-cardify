@@ -69,7 +69,7 @@ router.use(authenticated).post(async (req, res) => {
 
       await kv.set(hash, completion.items);
       await kv.expire(hash, 10 * 60);
-  
+
       cached = completion.items;
     } catch (e: any) {
       return res.status(500).json({ error: e.message });

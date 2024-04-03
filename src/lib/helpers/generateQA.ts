@@ -1,5 +1,4 @@
-import { OpenAI } from "openai";
-import { sleep } from "./sleep";
+import { OpenAI } from 'openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || 'asdada',
@@ -11,9 +10,13 @@ type GeneratedQA = {
     question: string;
     answer: string;
   }[];
-}
+};
 
-export const generateQA = async (text: string, tries = 0, max = 3): Promise<GeneratedQA | null> => {
+export const generateQA = async (
+  text: string,
+  tries = 0,
+  max = 3,
+): Promise<GeneratedQA | null> => {
   if (tries >= max) {
     return null;
   }
@@ -23,7 +26,8 @@ export const generateQA = async (text: string, tries = 0, max = 3): Promise<Gene
     messages: [
       {
         role: 'system',
-        content: 'You are a question & answer bot generator and you will follow the correct output JSON template, and fill the provided "{{#}}" accordingly. Try to make the answers simple and short but still informative.'
+        content:
+          'You are a question & answer bot generator and you will follow the correct output JSON template, and fill the provided "{{#}}" accordingly. Try to make the answers simple and short but still informative.',
       },
       {
         role: 'user',
@@ -34,16 +38,19 @@ export const generateQA = async (text: string, tries = 0, max = 3): Promise<Gene
         
           json
           {
-            "items": [${new Array(10).fill(0).map(
-              () => `{
+            "items": [${new Array(10)
+              .fill(0)
+              .map(
+                () => `{
                 "question": "{{#}}",
                 "answer": "{{#}}"
-              }`
-            ).join(',\n')}]
+              }`,
+              )
+              .join(',\n')}]
           }
-        `
-      }
-    ]
+        `,
+      },
+    ],
   });
 
   const [output] = completion.choices;
@@ -61,4 +68,4 @@ export const generateQA = async (text: string, tries = 0, max = 3): Promise<Gene
   } catch {
     return null;
   }
-}
+};
