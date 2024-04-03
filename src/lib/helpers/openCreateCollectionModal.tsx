@@ -10,7 +10,7 @@ import { DefaultResponse, fetcher } from '../api';
 
 const ModalContent = ({ modalId }: { modalId: string }) => {
   const router = useRouter();
-  const generatedName = useMemo(() => generate(3).join(' '), []);
+  const generatedName = useMemo(() => (generate(3) as string[]).join(' '), []);
   const [loading, setLoading] = useState(false);
   const form = useForm({
     initialValues: {

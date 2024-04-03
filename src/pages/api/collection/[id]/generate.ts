@@ -16,11 +16,11 @@ type Generated = { question: string[]; answer: string[] };
 type GeneratedMapped = { question: string; answer: string }[];
 
 const davinci = createOpenAICompletion(
-  { model: "text-davinci-003" },
+  { model: 'text-davinci-003' },
   {
     apiKey: process.env.OPENAI_API_KEY,
     basePath: process.env.OPENAI_API_URL ?? 'https://api.openai.com/v1',
-  }
+  },
 );
 
 const agent = davinci<{ text: string }, Generated>(

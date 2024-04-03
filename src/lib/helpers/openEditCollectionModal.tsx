@@ -17,7 +17,7 @@ const ModalContent = ({
   collection: Collection;
 }) => {
   const { mutate } = useSWRConfig();
-  const generatedName = useMemo(() => generate(3).join(' '), []);
+  const generatedName = useMemo(() => (generate(3) as string[]).join(' '), []);
   const [loading, setLoading] = useState(false);
   const form = useForm({
     initialValues: {
