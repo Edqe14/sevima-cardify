@@ -12,11 +12,9 @@ const nextConfig = {
       },
     ],
   },
-  modularizeImports: {
-    "@phosphor-icons/react": {
-      transform: "@phosphor-icons/react/{{member}}",
-    },
-  },
+  experimental: { 
+    optimizePackageImports: ['@phosphor-icons/react']
+  }
 };
 
 const withPWA = withPWAInstance({
