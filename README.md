@@ -14,6 +14,9 @@
 
 Cardify is an AI-powered flash card generator that helps you to memorize your study materials, built for [SEMESTA Hackathon Batch 5](https://maukuliah.id/beasiswa-semesta).
 
+[🖼 Presentation](https://docs.google.com/presentation/d/1Q08xTGs7BkWiFqxqsZeLaCRiCqu8-roqBrP4_2TpyhQ/edit?usp=sharing)
+[🏆 Winners Announcement (Indonesian)](https://sevima.com/inilah-25-pemenang-beasiswa-semesta-2023-dapat-kuliah-gratis-dan-kesempatan-kerja/)
+
 ## 🔧 Getting Started
 
 First, install dependencies:
